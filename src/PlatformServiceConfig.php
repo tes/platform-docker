@@ -26,4 +26,13 @@ class PlatformServiceConfig
         return (bool) self::get('redis');
     }
 
+    /**
+     * Determines if the site is using solr.
+     *
+     * @return bool
+     */
+    public static function hasSolr() {
+        return (bool) self::get('solr');
+    }
+
 }

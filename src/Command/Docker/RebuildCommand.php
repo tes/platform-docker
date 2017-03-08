@@ -81,6 +81,9 @@ class RebuildCommand extends DockerCommand
             if (PlatformServiceConfig::hasRedis()) {
                 $composeContainers->addRedis();
             }
+            if (PlatformServiceConfig::hasSolr()) {
+                $composeContainers->addSolr();
+            }
         }
 
         $composeConfig->writeDockerCompose($composeContainers);
