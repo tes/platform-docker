@@ -7,6 +7,10 @@
     {
       "type": "vcs",
       "url": "https://github.com/alexpott/docker-helper"
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/alexpott/toolstack-helper"
     }
   ],
   "require": {
@@ -15,7 +19,7 @@
     "symfony/filesystem": "^2.7|^3.0",
     "symfony/yaml": "^2.7|^3.0",
     "symfony/process": "^2.7|^3.0",
-    "mglaman/toolstack-helper": "^0",
+    "mglaman/toolstack-helper": "dev-fix-drupal-detection",
     "mglaman/docker-helper": "dev-exec"
   },
   "require-dev": {
