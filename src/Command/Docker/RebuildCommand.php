@@ -13,7 +13,6 @@ use mglaman\Docker\Docker;
 use mglaman\PlatformDocker\Config;
 use mglaman\PlatformDocker\Platform;
 use mglaman\PlatformDocker\PlatformAppConfig;
-use mglaman\PlatformDocker\PlatformServiceConfig;
 use mglaman\PlatformDocker\Stacks\StacksFactory;
 use mglaman\Toolstack\Toolstack;
 use mglaman\Toolstack\Stacks;
@@ -78,10 +77,10 @@ class RebuildCommand extends DockerCommand
         }
         // Support services defined in .platform/services.yaml
         else {
-            if (PlatformServiceConfig::hasRedis()) {
+            if (PlatformAppConfig::hasRedis()) {
                 $composeContainers->addRedis();
             }
-            if (PlatformServiceConfig::hasSolr()) {
+            if (PlatformAppConfig::hasSolr()) {
                 $composeContainers->addSolr();
             }
         }
