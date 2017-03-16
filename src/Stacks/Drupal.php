@@ -75,12 +75,17 @@ class Drupal extends StacksBase
 
     protected function ensureLocalSettings() {
         // @todo: Check if settings.local.php exists, load in any $conf changes.
+        $target = Platform::sharedDir() . '/settings.local.php';
+        if ($this->fs->exists($target)) {
+            // Try and make it deletable.
+            $this->fs->chmod($target, 0644);
+        }
         switch ($this->version) {
             case DrupalStackHelper::DRUPAL7:
-                $this->fs->copy(CLI_ROOT . '/resources/stacks/drupal7/settings.local.php', Platform::sharedDir() . '/settings.local.php', true);
+                $this->fs->copy(CLI_ROOT . '/resources/stacks/drupal7/settings.local.php', $target, true);
                 break;
             case DrupalStackHelper::DRUPAL8:
-                $this->fs->copy(CLI_ROOT . '/resources/stacks/drupal8/settings.local.php', Platform::sharedDir() . '/settings.local.php', true);
+                $this->fs->copy(CLI_ROOT . '/resources/stacks/drupal8/settings.local.php', $target, true);
                 break;
             default:
                 throw new \Exception('Unsupported version of Drupal. Write a pull reuqest!');
