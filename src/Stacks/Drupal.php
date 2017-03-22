@@ -75,24 +75,24 @@ class Drupal extends StacksBase
 
     protected function ensureLocalSettings() {
         // @todo: Check if settings.local.php exists, load in any $conf changes.
-        $target = Platform::sharedDir() . '/settings.local.php';
-        if ($this->fs->exists($target)) {
+        $target_local_settings = Platform::sharedDir() . '/settings.local.php';
+        if ($this->fs->exists($target_local_settings)) {
             // Try and make it deletable.
-            $this->fs->chmod($target, 0644);
+            $this->fs->chmod($target_local_settings, 0644);
         }
         switch ($this->version) {
             case DrupalStackHelper::DRUPAL7:
-                $this->fs->copy(CLI_ROOT . '/resources/stacks/drupal7/settings.local.php', $target, true);
+                $this->fs->copy(CLI_ROOT . '/resources/stacks/drupal7/settings.local.php', $target_local_settings, true);
                 break;
             case DrupalStackHelper::DRUPAL8:
-                $this->fs->copy(CLI_ROOT . '/resources/stacks/drupal8/settings.local.php', $target, true);
+                $this->fs->copy(CLI_ROOT . '/resources/stacks/drupal8/settings.local.php', $target_local_settings, true);
                 break;
             default:
                 throw new \Exception('Unsupported version of Drupal. Write a pull reuqest!');
         }
 
         // Replace template variables.
-        $localSettings = file_get_contents(Platform::sharedDir() . '/settings.local.php');
+        $localSettings = file_get_contents($target_local_settings);
         if (file_exists(Platform::rootDir() . '/.platform-project.local.settings.php')) {
             $additional_settings = file_get_contents(Platform::rootDir() . '/.platform-project.local.settings.php');
             $additional_settings = str_replace("<?php\n", '', $additional_settings);
@@ -105,7 +105,7 @@ class Drupal extends StacksBase
         $localSettings = str_replace('{{ project_domain }}', $this->projectName . '.' . $this->projectTld, $localSettings);
         $localSettings = str_replace('{{ mysql_user }}', Mysql::getMysqlUser(), $localSettings);
         $localSettings = str_replace('{{ mysql_password }}', Mysql::getMysqlPassword(), $localSettings);
-        file_put_contents(Platform::sharedDir() . '/settings.local.php', $localSettings);
+        file_put_contents($target_local_settings, $localSettings);
 
         // Relink if missing.
         if (!$this->fs->exists(Platform::webDir() . '/sites/default/settings.local.php')) {
