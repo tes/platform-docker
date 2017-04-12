@@ -75,9 +75,6 @@ class ComposeConfig
         // Copy Dockerfile for php-fpm
         $this->fs->copy($this->resourcesDir . "/images/php/{$this->phpVersion}/Dockerfile",
           $this->projectPath . '/docker/images/php/Dockerfile', TRUE);
-        // Copy unison.
-        $this->fs->mirror($this->resourcesDir . "/unison/2.48.4",
-            $this->projectPath . '/docker/images/php/unison');
     }
 
     public function copyConfigs()

@@ -7,12 +7,9 @@ RUN apt-get update && apt-get install -y \
         libmcrypt-dev \
         libpng12-dev \
         libxml2-dev \
-        rsync \
-        parallel \
         supervisor \
-        ocaml
-RUN docker-php-ext-install mcrypt pdo_mysql mysqli mbstring opcache soap bcmath
-RUN docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
+    && docker-php-ext-install mcrypt pdo_mysql mysqli mbstring opcache soap bcmath \
+    && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
     && docker-php-ext-install gd
 
 # Make memcache available
@@ -45,11 +42,33 @@ RUN export VERSION=`php -r "echo PHP_MAJOR_VERSION.PHP_MINOR_VERSION;"` \
     && echo "extension=blackfire.so\nblackfire.agent_socket=\${BLACKFIRE_PORT}" > $PHP_INI_DIR/conf.d/blackfire.ini
 
 # Set up unison
-RUN mkdir -p /root/unison
-COPY unison /root/unison
-WORKDIR /root/unison
-RUN  make UISTYLE=text
-WORKDIR /root
+# See https://hub.docker.com/r/kalabox/unison/~/dockerfile/
+ENV UNISON_VERSION=2.49.543
+ENV UNISON_CODEROOT=/code
+ENV UNISON_WEBROOT=/var/www
+ENV UNISON_OPTIONS=
+
+RUN apt-get update && apt-get install -y \
+    curl \
+  && curl -fsSL -o /tmp/Release.key "http://download.opensuse.org/repositories/home:ocaml/xUbuntu_14.04/Release.key" \
+  && apt-key add - < /tmp/Release.key \
+  && sh -c "echo 'deb http://download.opensuse.org/repositories/home:/ocaml/xUbuntu_14.04/ /' >> /etc/apt/sources.list.d/ocaml.list" \
+  && apt-get update -y \
+  && apt-get install -y --force-yes \
+    ocaml \
+    build-essential \
+    exuberant-ctags \
+  && curl -fsSL -o /tmp/unison.tar.gz "http://www.seas.upenn.edu/~bcpierce/unison//download/releases/unison-$UNISON_VERSION/unison-$UNISON_VERSION.tar.gz" && \
+    cd /tmp && tar -xzvf unison.tar.gz && \
+    rm -rf unison.tar.gz && \
+    cd src \
+  && make UISTYLE=text && \
+    cp -f unison /usr/local/bin && \
+    cp -f unison-fsmonitor /usr/local/bin \
+  && apt-get purge -y ocaml build-essential exuberant-ctags \
+  && apt-get clean autoclean \
+  && apt-get autoremove -y \
+  && rm -rf /var/lib/{apt,dpkg,cache,log}/ /tmp/* /var/tmp/*
 
 # Set up supervisor
 RUN mkdir -p /var/log/supervisor
