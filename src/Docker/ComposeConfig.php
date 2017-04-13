@@ -75,6 +75,8 @@ class ComposeConfig
         // Copy Dockerfile for php-fpm
         $this->fs->copy($this->resourcesDir . "/images/php/{$this->phpVersion}/Dockerfile",
           $this->projectPath . '/docker/images/php/Dockerfile', TRUE);
+        $this->fs->copy($this->resourcesDir . "/images/unison/Dockerfile",
+            $this->projectPath . '/docker/images/unison/Dockerfile', TRUE);
     }
 
     public function copyConfigs()
@@ -108,13 +110,6 @@ class ComposeConfig
         $nginxConf = str_replace('{{ docroot }}', Config::get('docroot'), $nginxConf);
         file_put_contents($nginxConfFile, $nginxConf);
 
-        // Quick fix to make supervisord.conf for now.
-        $supervisorConfFile = $this->projectPath . '/docker/conf/supervisord.conf';
-        $supervisorConf = file_get_contents($supervisorConfFile);
-        $supervisorConf = str_replace('{{ platform }}', Platform::projectName() . '.' . Platform::projectTld(), $supervisorConf);
-        $supervisorConf = str_replace('{{ docroot }}', Config::get('docroot'), $supervisorConf);
-        file_put_contents($supervisorConfFile, $supervisorConf);
-
         // stub in for Solr configs
         $finder = new Finder();
         $finder->in($this->resourcesDir . '/conf/solr')
@@ -140,7 +135,6 @@ class ComposeConfig
             "php/{$this->phpVersion}/fpm.conf" => 'fpm.conf',
             'mysql.cnf' => 'mysql.cnf',
             'nginx.conf' => 'nginx.conf',
-            'supervisord.conf' => 'supervisord.conf',
             "php/{$this->phpVersion}/php.ini" => 'php.ini',
         ];
     }

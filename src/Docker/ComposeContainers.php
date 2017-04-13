@@ -38,6 +38,7 @@ class ComposeContainers
         $this->path = $path;
         $this->name = $name;
         // Add required containers.
+        $this->addUnison();
         $this->addPhpFpm();
         $this->addDatabase();
         $this->addWebserver();
@@ -61,13 +62,11 @@ class ComposeContainers
     public function addPhpFpm()
     {
         $this->config['phpfpm'] = [
-          'command' => '/usr/bin/supervisord',
+          'command' => 'php-fpm --allow-to-run-as-root',
           'build'   => 'docker/images/php',
           'volumes' => [
             './docker/conf/fpm.conf:/usr/local/etc/php-fpm.conf',
-            './:/var/platform',
             './docker/conf/php.ini:/usr/local/etc/php/conf.d/local.ini',
-            './docker/conf/supervisord.conf:/etc/supervisor/conf.d/supervisord.conf',
             'code:/var/www/html',
           ],
           'links' => [
@@ -108,6 +107,22 @@ class ComposeContainers
             $this->config['mariadb']['environment']['MYSQL_USER'] = $user;
             $this->config['mariadb']['environment']['MYSQL_PASSWORD'] = Mysql::getMysqlPassword();
         }
+    }
+
+
+    /**
+     *
+     */
+    public function addUnison()
+    {
+        $this->config['unison'] = [
+            'command' => '/usr/local/bin/unison /var/platform /var/www/html -confirmbigdel=false -prefer=/var/platform -fastcheck=true -times=true -watch=true -auto -batch -repeat=watch -retry=5 -ignore="Name {.git,*.swp,.idea,volumes,docker/*}"',
+            'build'   => 'docker/images/unison',
+            'volumes' => [
+                './:/var/platform',
+                'code:/var/www/html',
+            ],
+        ];
     }
 
     /**
