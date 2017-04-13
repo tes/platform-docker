@@ -20,7 +20,7 @@
     "symfony/yaml": "^2.7|^3.0",
     "symfony/process": "^2.7|^3.0",
     "mglaman/toolstack-helper": "dev-fix-drupal-detection",
-    "mglaman/docker-helper": "dev-exec"
+    "mglaman/docker-helper": "dev-tes"
   },
   "require-dev": {
     "phpunit/phpunit": "^4.3"
