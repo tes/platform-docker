@@ -2,6 +2,7 @@
 
 namespace mglaman\PlatformDocker\Stacks;
 
+use mglaman\Docker\Compose;
 use mglaman\PlatformDocker\Mysql\Mysql;
 use mglaman\Toolstack\Toolstack;
 use mglaman\Toolstack\Stacks\Drupal as DrupalStackHelper;
@@ -91,6 +92,20 @@ class Drupal extends StacksBase
                 throw new \Exception('Unsupported version of Drupal. Write a pull reuqest!');
         }
 
+        $web_container_name = Compose::getContainerName(Platform::projectName(), 'nginx');
+        $detect_port_command = "docker inspect --format='{{(index (index .NetworkSettings.Ports \"80/tcp\") 0).HostPort}}' $web_container_name";
+        $placeholders = [
+          '{{ salt }}' => hash('sha256', serialize($_SERVER)),
+          '{{ container_name }}' => $this->containerName,
+          '{{ redis_container_name }}' => $this->redisContainerName,
+          '{{ solr_container_name }}' => $this->solrContainerName,
+          '{{ project_domain }}' => $this->projectName . '.' . $this->projectTld,
+          '{{ external_project_domain }}' => 'http://localhost/' . trim(shell_exec($detect_port_command)),
+          '{{ mysql_user }}' => Mysql::getMysqlUser(),
+          '{{ mysql_password }}' => Mysql::getMysqlPassword(),
+          '{{ project_root }}' => Platform::rootDir(),
+        ];
+        
         // Replace template variables.
         $localSettings = file_get_contents($target_local_settings);
         if (file_exists(Platform::rootDir() . '/.platform-project.local.settings.php')) {
@@ -98,21 +113,20 @@ class Drupal extends StacksBase
             $additional_settings = str_replace("<?php\n", '', $additional_settings);
             $localSettings .= $additional_settings;
         }
-        $localSettings = str_replace('{{ salt }}', hash('sha256', serialize($_SERVER)), $localSettings);
-        $localSettings = str_replace('{{ container_name }}', $this->containerName, $localSettings);
-        $localSettings = str_replace('{{ redis_container_name }}', $this->redisContainerName, $localSettings);
-        $localSettings = str_replace('{{ solr_container_name }}', $this->solrContainerName, $localSettings);
-        $localSettings = str_replace('{{ project_domain }}', $this->projectName . '.' . $this->projectTld, $localSettings);
-        $localSettings = str_replace('{{ mysql_user }}', Mysql::getMysqlUser(), $localSettings);
-        $localSettings = str_replace('{{ mysql_password }}', Mysql::getMysqlPassword(), $localSettings);
+        $localSettings = str_replace(array_keys($placeholders), array_values($placeholders), $localSettings);
         file_put_contents($target_local_settings, $localSettings);
 
         // Relink if missing.
         if (!$this->fs->exists(Platform::webDir() . '/sites/default/settings.local.php')) {
             $this->fs->symlink($this->getRelativeLinkToShared() . '/settings.local.php', Platform::webDir() . '/sites/default/settings.local.php');
         }
-    }
 
+      if (file_exists(Platform::rootDir() . '/tests/behat.local.yml.dist')) {
+          $behat_local_yml = file_get_contents(Platform::rootDir() . '/tests/behat.local.yml.dist');
+          $behat_local_yml = str_replace(array_keys($placeholders), array_values($placeholders), $behat_local_yml);
+          file_put_contents(Platform::rootDir() . '/tests/behat.local.yml', $behat_local_yml);
+      }
+    }
 
     /**
      * Write a drushrc
