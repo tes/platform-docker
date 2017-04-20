@@ -27,8 +27,8 @@ class DrushCommand extends DockerCommand
             ->setName('drush')
             ->addArgument('cmd', InputArgument::IS_ARRAY | InputArgument::OPTIONAL, 'Command and arguments to pass to Drush', ['status'])
             ->setDescription('Runs a Drush command for environment.')
-            ->setHelp('For example, <info>drush en --drush_option=-y contact</info>')
-            ->addOption('drush_option', null, InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Additional options to pass to Drush. For example --drush_option=-y');
+            ->setHelp('For example, <info>drush en --drush_option=y contact</info>. ')
+            ->addOption('drush_option', 'd', InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY, 'Additional options to pass to Drush. For example --drush_option=-y or in short form -dy');
 
     }
 
@@ -48,6 +48,9 @@ class DrushCommand extends DockerCommand
             $processBuilder->add($argument);
         }
         foreach ($input->getOption('drush_option') as $option) {
+            if (strpos($option, '-') !== 0) {
+                $option = '-' . $option;
+            }
             $processBuilder->add($option);
         }
 
