@@ -19,6 +19,7 @@ use mglaman\Toolstack\Stacks;
 use mglaman\PlatformDocker\Docker\ComposeConfig;
 use mglaman\PlatformDocker\Docker\ComposeContainers;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Filesystem\Exception\IOException;
 
@@ -32,6 +33,7 @@ class RebuildCommand extends DockerCommand
         $this
           ->setName('docker:rebuild')
           ->setAliases(['rebuild'])
+          ->addOption('volumes', 'vol', InputOption::VALUE_NONE, "Rebuild the volumes as well.")
           ->setDescription('Rebuild configurations and containers');
     }
 
@@ -94,7 +96,7 @@ class RebuildCommand extends DockerCommand
         }
 
         // Stop and remove any existing containers.
-        Compose::down(TRUE);
+        Compose::down((bool) $input->getOption('volumes'));
 
         $this->stdOut->writeln('<info>Building the containers</info>');
         Compose::build();
