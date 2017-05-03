@@ -33,7 +33,6 @@ class RebuildCommand extends DockerCommand
         $this
           ->setName('docker:rebuild')
           ->setAliases(['rebuild'])
-          ->addOption('volumes', 'vol', InputOption::VALUE_NONE, "Rebuild the volumes as well.")
           ->setDescription('Rebuild configurations and containers');
     }
 
@@ -96,7 +95,8 @@ class RebuildCommand extends DockerCommand
         }
 
         // Stop and remove any existing containers.
-        Compose::down((bool) $input->getOption('volumes'));
+        Compose::stop();
+        Compose::rm(TRUE);
 
         $this->stdOut->writeln('<info>Building the containers</info>');
         Compose::build();
