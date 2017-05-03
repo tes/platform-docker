@@ -9,6 +9,7 @@
 namespace mglaman\PlatformDocker\Command;
 
 use mglaman\PlatformDocker\Command\Docker\DockerCommand;
+use mglaman\PlatformDocker\DrushDiscovery;
 use mglaman\PlatformDocker\Platform;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -40,7 +41,7 @@ class DrushCommand extends DockerCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $processBuilder = ProcessBuilder::create([
-            'drush',
+            DrushDiscovery::getExecutable(),
             '--root=' . Platform::webDir(),
             '--uri=' . Platform::getUri()
         ]);
