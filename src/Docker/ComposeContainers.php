@@ -89,7 +89,7 @@ class ComposeContainers
             '3306',
           ],
           'volumes' => [
-            './docker/data:/var/lib/mysql',
+              $this->osxPerformance('./docker/data:/var/lib/mysql'),
             './docker/conf/mysql.cnf:/etc/mysql/my.cnf',
           ],
           'environment' => [
@@ -170,7 +170,7 @@ class ComposeContainers
               '8983',
           ],
           'volumes' => [
-              $solr_volume,
+              $this->osxPerformance($solr_volume),
           ],
         ];
         $this->config['phpfpm']['links'][] = 'solr';
