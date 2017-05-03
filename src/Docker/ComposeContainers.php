@@ -3,6 +3,7 @@
 namespace mglaman\PlatformDocker\Docker;
 
 
+use mglaman\Docker\Docker;
 use mglaman\PlatformDocker\Config;
 use mglaman\PlatformDocker\Mysql\Mysql;
 use mglaman\PlatformDocker\Platform;
@@ -62,7 +63,7 @@ class ComposeContainers
           'build'   => 'docker/images/php',
           'volumes' => [
             './docker/conf/fpm.conf:/usr/local/etc/php-fpm.conf',
-            './:/var/platform',
+              $this->osxPerformance('./:/var/platform'),
             './docker/conf/php.ini:/usr/local/etc/php/conf.d/local.ini',
           ],
           'links' => [
@@ -114,7 +115,7 @@ class ComposeContainers
           'image' => 'nginx:1.9.0',
           'volumes' => [
             './docker/conf/nginx.conf:/etc/nginx/conf.d/default.conf',
-            './:/var/platform',
+            $this->osxPerformance('./:/var/platform'),
             './docker/ssl/nginx.crt:/etc/nginx/ssl/nginx.crt',
             './docker/ssl/nginx.key:/etc/nginx/ssl/nginx.key',
           ],
@@ -197,4 +198,22 @@ class ComposeContainers
         ];
         $this->config['phpfpm']['links'][] = 'blackfire';
     }
+
+    /**
+     * Increases os performance for using mapped volumes.
+     *
+     * @param $volume
+     * @return string
+     */
+    protected function osxPerformance($volume) {
+        static $docker_version;
+        if (!$docker_version) {
+            $docker_version = Docker::getServerVersion();
+        }
+        if (PHP_OS == 'Darwin' && version_compare($docker_version, '17.04.0', '>=')) {
+          $volume .= ':cached';
+        }
+        return $volume;
+    }
+
 }
