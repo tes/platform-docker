@@ -142,6 +142,7 @@ class ComposeConfig
             'mysql.cnf' => 'mysql.cnf',
             'nginx.conf' => 'nginx.conf',
             "php/{$this->phpVersion}/php.ini" => 'php.ini',
+            'php/mailcatcher.ini' => 'mailcatcher.ini',
         ];
     }
 }

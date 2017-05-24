@@ -43,6 +43,7 @@ class ComposeContainers
         $this->addPhpFpm();
         $this->addDatabase();
         $this->addWebserver();
+        $this->addMailCatcher();
     }
 
 
@@ -133,7 +134,17 @@ class ComposeContainers
         ];
     }
 
-    /**
+  public function addMailCatcher() {
+    $this->config['mailcatcher'] = [
+      'image' => 'schickling/mailcatcher:latest',
+      'ports' => ['1080'],
+      'command' => ["mailcatcher", "-f", "--ip=0.0.0.0", "--smtp-port=25"],
+    ];
+    $this->config['phpfpm']['links'][] = 'mailcatcher:mail';
+    $this->config['phpfpm']['volumes'][] = './docker/conf/mailcatcher.ini:/usr/local/etc/php/conf.d/mail.ini';
+  }
+
+  /**
      *
      */
     public function addRedis() {
