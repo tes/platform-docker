@@ -54,7 +54,7 @@ class ComposeContainers
       return Yaml::dump([
           'version' => '3',
           'services' => $this->config,
-      ]);
+      ], 100);
     }
 
     /**
