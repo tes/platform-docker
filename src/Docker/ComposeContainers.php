@@ -51,7 +51,10 @@ class ComposeContainers
      * @return string
      */
     public function yaml() {
-        return Yaml::dump($this->config);
+      return Yaml::dump([
+          'version' => '3',
+          'services' => $this->config,
+      ]);
     }
 
     /**
