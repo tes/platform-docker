@@ -62,14 +62,21 @@ class ComposeContainers
      */
     public function addPhpFpm()
     {
-        $this->config['phpfpm'] = [
+      $volumes = [
+        './docker/conf/fpm.conf:/usr/local/etc/php-fpm.conf',
+        $this->osxPerformance('./:/var/platform'),
+        './docker/conf/php.ini:/usr/local/etc/php/conf.d/local.ini',
+      ];
+      // Add any platform.sh PHP settings.
+      if (file_exists(Platform::rootDir() . '/php.ini')) {
+        // Ensure it gets added early to provide defaults that can be
+        // overridden.
+        $volumes[] = './php.ini:/usr/local/etc/php/conf.d/000-platform.ini';
+      }
+      $this->config['phpfpm'] = [
           'command' => 'php-fpm --allow-to-run-as-root',
           'build'   => 'docker/images/php',
-          'volumes' => [
-            './docker/conf/fpm.conf:/usr/local/etc/php-fpm.conf',
-              $this->osxPerformance('./:/var/platform'),
-            './docker/conf/php.ini:/usr/local/etc/php/conf.d/local.ini',
-          ],
+          'volumes' => $volumes,
           'links' => [
             'mariadb',
           ],
